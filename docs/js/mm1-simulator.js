@@ -1,9 +1,31 @@
 /**
  * M/M/1 Queue Simulator - JavaScript Implementation
- * Port of the Python simulation engine for web interface
+ * 
+ * Web-based port of the Python simulation engine providing identical mathematical
+ * behavior for browser-based educational experiences.
+ * 
+ * @fileoverview Main simulation engine for M/M/1 queue visualization
+ * @author Scott Friedman (with Claude Code Assistant)
+ * @license MIT License - Copyright (c) 2025 Scott Friedman
+ * @version 1.0.0
  */
 
+/**
+ * Represents a single customer/job in the M/M/1 queue system.
+ * 
+ * Tracks the complete customer journey from arrival through service completion,
+ * enabling detailed analysis of individual experiences and system behavior.
+ * 
+ * @class Customer
+ */
 class Customer {
+    /**
+     * Creates a new customer instance.
+     * 
+     * @param {number} id - Unique identifier for the customer
+     * @param {number} arrivalTime - When the customer arrived at the system
+     * @param {number} serviceTime - How long the customer's service takes
+     */
     constructor(id, arrivalTime, serviceTime) {
         this.id = id;
         this.arrivalTime = arrivalTime;
@@ -12,22 +34,69 @@ class Customer {
         this.departureTime = null;
     }
 
+    /**
+     * Time spent waiting in queue before service begins.
+     * @returns {number} Wait time in time units
+     */
     get waitTime() {
         if (this.startServiceTime === null) return 0.0;
         return this.startServiceTime - this.arrivalTime;
     }
 
+    /**
+     * Total time spent in the system (wait + service).
+     * @returns {number} Total system time in time units
+     */
     get timeInSystem() {
         if (this.departureTime === null) return 0.0;
         return this.departureTime - this.arrivalTime;
     }
 
+    /**
+     * Whether the customer has completed service and left the system.
+     * @returns {boolean} True if customer has departed
+     */
     get isCompleted() {
         return this.departureTime !== null;
     }
 }
 
+/**
+ * M/M/1 Queue Simulation Engine - JavaScript Implementation
+ * 
+ * Faithful port of the Python MM1Queue class providing identical mathematical
+ * behavior for web-based educational experiences. Implements discrete-event
+ * simulation of a single-server queue with Poisson arrivals and exponential
+ * service times.
+ * 
+ * Features:
+ * - Event-driven simulation with precise timing
+ * - Real-time statistics collection and analysis  
+ * - Little's Law verification (L = λW)
+ * - Individual customer journey tracking
+ * - Educational insights and confidence assessment
+ * 
+ * Mathematical Background:
+ * - λ (lambda): Arrival rate (customers per time unit)
+ * - μ (mu): Service rate (customers per time unit)
+ * - ρ (rho): Traffic intensity = λ/μ (system is stable when ρ < 1)
+ * 
+ * @class MM1Queue
+ * @example
+ * const queue = new MM1Queue(2.0, 3.0);
+ * for (let i = 0; i < 100; i++) {
+ *     queue.step();
+ * }
+ * const stats = queue.getStatistics();
+ * console.log(`Average queue length: ${stats.queueLength}`);
+ */
 class MM1Queue {
+    /**
+     * Creates a new M/M/1 queue simulation.
+     * 
+     * @param {number} arrivalRate - Average customer arrivals per time unit (λ)
+     * @param {number} serviceRate - Average service completions per time unit (μ)
+     */
     constructor(arrivalRate, serviceRate) {
         this.arrivalRate = arrivalRate;
         this.serviceRate = serviceRate;

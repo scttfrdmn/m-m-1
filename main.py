@@ -1,7 +1,30 @@
 #!/usr/bin/env python3
 """
-M/M/1 Queue Simulator
-A simulation of a single-server queue with Poisson arrivals and exponential service times.
+M/M/1 Queue Simulator with HPC Context
+
+A comprehensive educational simulator for M/M/1 queuing systems that demonstrates 
+fundamental queueing theory concepts through interactive visualization and analysis.
+
+Features:
+- Real-time ASCII visualization of queue dynamics
+- Educational insights including Little's Law verification
+- Individual customer journey tracking
+- HPC job scheduling context mode
+- Multiple optimization strategies
+- Comprehensive statistical analysis
+
+The simulator implements an event-driven M/M/1 queue where:
+- M: Markovian (Poisson) arrival process
+- M: Markovian (exponential) service times  
+- 1: Single server
+
+This model is fundamental for understanding system performance, capacity planning,
+and the relationship between utilization and response times.
+
+Author: Scott Friedman (with Claude Code Assistant)
+License: MIT License - Copyright (c) 2025 Scott Friedman
+Repository: https://github.com/scttfrdmn/m-m-1
+Web Demo: https://scttfrdmn.github.io/m-m-1/
 """
 
 import random
@@ -18,6 +41,19 @@ import threading
 
 @dataclass
 class Customer:
+    """
+    Represents a single customer/job in the M/M/1 queue system.
+    
+    Tracks the complete journey of a customer from arrival through service completion,
+    enabling detailed analysis of individual experiences within the system.
+    
+    Attributes:
+        id: Unique identifier for the customer
+        arrival_time: When the customer arrived at the system
+        service_time: How long the customer's service takes
+        start_service_time: When service began (None if still waiting)
+        departure_time: When customer left the system (None if still in system)
+    """
     id: int
     arrival_time: float
     service_time: float
@@ -45,6 +81,42 @@ class Customer:
 
 
 class MM1Queue:
+    """
+    M/M/1 Queue Simulation Engine
+    
+    Implements a discrete-event simulation of a single-server queue with Poisson 
+    arrivals and exponential service times. This is the core mathematical model
+    that demonstrates fundamental queueing theory principles.
+    
+    The simulator uses event-driven simulation, processing arrivals and departures
+    in chronological order while maintaining detailed statistics for educational
+    analysis and Little's Law verification.
+    
+    Key Features:
+    - Event-driven simulation with accurate timing
+    - Real-time statistics collection and analysis
+    - Little's Law verification (L = λW)
+    - Individual customer journey tracking
+    - Steady-state confidence assessment
+    - Educational insights and pattern detection
+    
+    Mathematical Background:
+    - λ (lambda): Arrival rate (customers per time unit)
+    - μ (mu): Service rate (customers per time unit)  
+    - ρ (rho): Traffic intensity = λ/μ
+    - System is stable when ρ < 1
+    
+    Args:
+        arrival_rate: Average customer arrivals per time unit (λ)
+        service_rate: Average service completions per time unit (μ)
+    
+    Example:
+        >>> queue = MM1Queue(arrival_rate=2.0, service_rate=3.0)
+        >>> for _ in range(100):
+        ...     queue.step()
+        >>> stats = queue.get_statistics()
+        >>> print(f"Average queue length: {stats['queue_length']}")
+    """
     def __init__(self, arrival_rate: float, service_rate: float):
         self.arrival_rate = arrival_rate  # lambda (customers per time unit)
         self.service_rate = service_rate  # mu (customers per time unit)

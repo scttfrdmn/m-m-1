@@ -228,8 +228,18 @@ m-m-1/
 3. **Extend Python code** for custom research needs
 4. **Reference implementation** for M/M/1 baseline
 
+## 📄 License
+
+MIT License - Copyright (c) 2025 Scott Friedman
+
+See [LICENSE](LICENSE) file for full details. Free to use, modify, and distribute for educational and commercial purposes.
+
+## 🤝 Contributing
+
+This project is designed for educational use. Contributions that enhance the learning experience are welcome!
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on how to contribute code, documentation, educational content, and other improvements.
+
 ---
 
 **🎓 Educational Impact**: Transforms abstract queueing theory into interactive, visual learning experiences that build intuition for system design and performance analysis.
-
-**🤝 Contributing**: This project is designed for educational use. Contributions that enhance the learning experience are welcome!
