@@ -13,6 +13,7 @@ class UIController {
         this.timeUnit = "time units";
         this.rateUnit = "customers/time";
         this.terminology = this.getTerminologyMap();
+        this.simulationSpeed = 5; // Default speed (1-10)
         
         try {
             this.initializeElements();
@@ -37,6 +38,8 @@ class UIController {
         this.stepBtn = document.getElementById('stepBtn');
         this.hpcToggle = document.getElementById('hpcMode');
         this.scenarioSelect = document.getElementById('scenarioSelect');
+        this.speedSlider = document.getElementById('speedSlider');
+        this.speedValue = document.getElementById('speedValue');
 
         // Display elements
         this.queueDisplay = document.getElementById('queueDisplay');
@@ -92,6 +95,9 @@ class UIController {
         }
         if (this.serviceRateSlider) {
             this.serviceRateSlider.addEventListener('input', () => this.updateServiceRate());
+        }
+        if (this.speedSlider) {
+            this.speedSlider.addEventListener('input', () => this.updateSpeed());
         }
         
         // Control buttons
@@ -187,6 +193,11 @@ class UIController {
         }
     }
 
+    updateSpeed() {
+        this.simulationSpeed = parseInt(this.speedSlider.value);
+        this.speedValue.textContent = this.simulationSpeed;
+    }
+
     updateParameterDisplays() {
         if (this.simulator) {
             this.arrivalRateSlider.value = this.simulator.arrivalRate;
@@ -255,15 +266,20 @@ class UIController {
 
     updateScenarioOptions() {
         // Clear existing options
-        this.scenarioSelect.innerHTML = '<option value="">Choose a scenario...</option>';
+        this.scenarioSelect.innerHTML = '';
         
         if (this.hpcMode) {
             // Add HPC scenarios
             if (typeof HPC_SCENARIOS !== 'undefined') {
+                let isFirst = true;
                 Object.entries(HPC_SCENARIOS).forEach(([key, scenario]) => {
                     const option = document.createElement('option');
                     option.value = key;
                     option.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)} (ρ=${(scenario.arrivalRate/scenario.serviceRate).toFixed(2)})`;
+                    if (isFirst || key === 'normal') {
+                        option.selected = true;
+                        isFirst = false;
+                    }
                     this.scenarioSelect.appendChild(option);
                 });
                 console.log(`Added ${Object.keys(HPC_SCENARIOS).length} HPC scenarios`);
@@ -280,16 +296,22 @@ class UIController {
                 { key: 'unstable', rate1: 3.1, rate2: 3.0, desc: 'Unstable (ρ=1.03)' }
             ];
             
-            scenarios.forEach(scenario => {
+            scenarios.forEach((scenario, index) => {
                 const option = document.createElement('option');
                 option.value = scenario.key;
                 option.textContent = scenario.desc;
                 option.dataset.arrival = scenario.rate1;
                 option.dataset.service = scenario.rate2;
+                if (index === 1) { // Select "Stable Medium" as default
+                    option.selected = true;
+                }
                 this.scenarioSelect.appendChild(option);
             });
             console.log(`Added ${scenarios.length} traditional scenarios`);
         }
+        
+        // Auto-load the selected scenario
+        this.loadScenario();
     }
 
     loadScenario() {
@@ -362,10 +384,11 @@ class UIController {
             console.error('Error in updateDisplay():', e);
         }
         
-        // Slow down animation for better visibility (500ms delay)
+        // Variable speed animation (100ms to 1000ms delay)
+        const delay = 1100 - (this.simulationSpeed * 100); // Speed 1 = 1000ms, Speed 10 = 100ms
         this.animationId = setTimeout(() => {
             requestAnimationFrame(() => this.animate());
-        }, 500);
+        }, delay);
     }
 
     updateDisplay() {
@@ -435,6 +458,32 @@ class UIController {
             statusText = '<span class="status-stable">STABLE</span>';
         }
         
+        // Get educational insight message
+        let eduNote = '';
+        if (this.hpcMode) {
+            if (rho >= 1.0) {
+                eduNote = "🚨 OVERLOADED: Job queue growing - need more nodes or job limits";
+            } else if (rho > 0.95) {
+                eduNote = "⚠️ CRITICAL: Near capacity - implement job throttling";
+            } else if (rho > 0.85) {
+                eduNote = "⚡ BUSY: High utilization - monitor queue growth";
+            } else if (rho < 0.5) {
+                eduNote = "💡 UNDERUTILIZED: Cluster has spare capacity";
+            } else {
+                eduNote = "✅ OPTIMAL: Good balance of throughput and responsiveness";
+            }
+        } else {
+            if (rho >= 1.0) {
+                eduNote = "⚠️ UNSTABLE: Queue will grow without bound!";
+            } else if (rho > 0.95) {
+                eduNote = "⚡ CRITICAL: Very sensitive to small changes";
+            } else if (rho < 0.5) {
+                eduNote = "💡 UNDERUTILIZED: Server idle often";
+            } else {
+                eduNote = "✅ STABLE: Good balance";
+            }
+        }
+        
         this.statsDisplay.innerHTML = `
             <div class="stat-row">
                 <strong>λ = ${this.simulator.arrivalRate.toFixed(1)}</strong> │ 
@@ -445,6 +494,9 @@ class UIController {
                 ${this.term('utilization')}: ${(stats.avgUtilization * 100).toFixed(1)}% │ 
                 Time: ${stats.currentTime.toFixed(1)} ${timeLabel} │ 
                 ${this.term('served')}: ${stats.customersServed}
+            </div>
+            <div class="stat-row" style="margin-top: 0.5rem; padding-top: 0.5rem; border-top: 1px solid #ddd;">
+                Education: ${eduNote}
             </div>
         `;
     }
