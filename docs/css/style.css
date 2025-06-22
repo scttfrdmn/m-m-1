@@ -415,6 +415,30 @@ body {
     text-decoration: none;
 }
 
+.support-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(135deg, #ff5f5f, #ff914d);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: var(--border-radius);
+    text-decoration: none;
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    margin: 0.5rem;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(255, 95, 95, 0.3);
+}
+
+.support-link:hover {
+    background: linear-gradient(135deg, #ff4444, #ff7722);
+    color: white;
+    text-decoration: none;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(255, 95, 95, 0.4);
+}
+
 /* Responsive design */
 @media (max-width: 768px) {
     .main-content {

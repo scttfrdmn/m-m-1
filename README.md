@@ -2,6 +2,7 @@
 
 [![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-Try_Now-blue?style=for-the-badge)](https://scttfrdmn.github.io/m-m-1/)
 [![Python Terminal](https://img.shields.io/badge/🐍_Terminal_Version-GitHub-green?style=for-the-badge)](https://github.com/scttfrdmn/m-m-1/blob/main/main.py)
+[![Support](https://img.shields.io/badge/☕_Support-Ko--fi-orange?style=for-the-badge)](https://ko-fi.com/scttfrdmn)
 
 A comprehensive educational simulator for M/M/1 queuing systems with both **interactive web interface** and **Python terminal implementation**. Perfect for teaching queueing theory concepts and HPC job scheduling behavior.
 
