@@ -204,12 +204,17 @@ class UIController {
         
         if (this.hpcMode) {
             // Add HPC scenarios
-            Object.entries(HPC_SCENARIOS).forEach(([key, scenario]) => {
-                const option = document.createElement('option');
-                option.value = key;
-                option.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)} (ρ=${(scenario.arrivalRate/scenario.serviceRate).toFixed(2)})`;
-                this.scenarioSelect.appendChild(option);
-            });
+            if (typeof HPC_SCENARIOS !== 'undefined') {
+                Object.entries(HPC_SCENARIOS).forEach(([key, scenario]) => {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = `${key.charAt(0).toUpperCase() + key.slice(1)} (ρ=${(scenario.arrivalRate/scenario.serviceRate).toFixed(2)})`;
+                    this.scenarioSelect.appendChild(option);
+                });
+                console.log(`Added ${Object.keys(HPC_SCENARIOS).length} HPC scenarios`);
+            } else {
+                console.error('HPC_SCENARIOS not defined');
+            }
         } else {
             // Add traditional scenarios
             const scenarios = [
@@ -228,6 +233,7 @@ class UIController {
                 option.dataset.service = scenario.rate2;
                 this.scenarioSelect.appendChild(option);
             });
+            console.log(`Added ${scenarios.length} traditional scenarios`);
         }
     }
 
