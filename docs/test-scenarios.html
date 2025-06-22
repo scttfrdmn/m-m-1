@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Scenarios</title>
+</head>
+<body>
+    <h1>Testing M/M/1 Scenarios</h1>
+    <div id="test-results"></div>
+
+    <script src="js/mm1-simulator.js"></script>
+    <script>
+        console.log('HPC_SCENARIOS:', HPC_SCENARIOS);
+        
+        const results = document.getElementById('test-results');
+        
+        if (typeof HPC_SCENARIOS !== 'undefined') {
+            results.innerHTML += '<h2>HPC Scenarios Found:</h2>';
+            Object.entries(HPC_SCENARIOS).forEach(([key, scenario]) => {
+                results.innerHTML += `<p><strong>${key}:</strong> λ=${scenario.arrivalRate}, μ=${scenario.serviceRate}, ρ=${(scenario.arrivalRate/scenario.serviceRate).toFixed(3)}</p>`;
+            });
+        } else {
+            results.innerHTML += '<p style="color: red;">HPC_SCENARIOS not found!</p>';
+        }
+        
+        // Test MM1Queue creation
+        try {
+            const queue = new MM1Queue(2.0, 2.5);
+            results.innerHTML += '<p style="color: green;">MM1Queue created successfully</p>';
+        } catch (e) {
+            results.innerHTML += `<p style="color: red;">MM1Queue creation failed: ${e.message}</p>`;
+        }
+    </script>
+</body>
+</html>

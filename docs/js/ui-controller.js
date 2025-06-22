@@ -114,6 +114,7 @@ class UIController {
     loadDefaultScenario() {
         this.simulator = new MM1Queue(2.0, 2.5);
         this.updateParameterDisplays();
+        this.updateScenarioOptions(); // Initialize scenario options
         this.updateDisplay();
     }
 
@@ -234,15 +235,20 @@ class UIController {
         const selectedValue = this.scenarioSelect.value;
         if (!selectedValue) return;
 
+        // Stop any running simulation
+        this.stopSimulation();
+
         if (this.hpcMode && HPC_SCENARIOS[selectedValue]) {
             const scenario = HPC_SCENARIOS[selectedValue];
             this.simulator = new MM1Queue(scenario.arrivalRate, scenario.serviceRate);
+            console.log(`Loaded HPC scenario: ${selectedValue}`, scenario);
         } else if (!this.hpcMode) {
             const option = this.scenarioSelect.selectedOptions[0];
             if (option.dataset.arrival && option.dataset.service) {
                 const arrivalRate = parseFloat(option.dataset.arrival);
                 const serviceRate = parseFloat(option.dataset.service);
                 this.simulator = new MM1Queue(arrivalRate, serviceRate);
+                console.log(`Loaded scenario: ${selectedValue} (λ=${arrivalRate}, μ=${serviceRate})`);
             }
         }
         
