@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug M/M/1 Simulator</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .debug { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+        .error { background: #ffe6e6; }
+        .success { background: #e6ffe6; }
+    </style>
+</head>
+<body>
+    <h1>M/M/1 Simulator Debug</h1>
+    <div id="output"></div>
+    
+    <button onclick="testSimulator()">Test Simulator</button>
+    <button onclick="testScenarios()">Test Scenarios</button>
+    <button onclick="startSimulation()">Start Simulation</button>
+    <button onclick="stopSimulation()">Stop Simulation</button>
+    
+    <div id="simulation-display" style="margin-top: 20px;">
+        <div>Queue: <span id="queue-display">-</span></div>
+        <div>Server: <span id="server-display">-</span></div>
+        <div>Stats: <span id="stats-display">-</span></div>
+        <div>Time: <span id="time-display">-</span></div>
+    </div>
+
+    <script src="js/mm1-simulator.js"></script>
+    <script>
+        const output = document.getElementById('output');
+        let simulator = null;
+        let animationId = null;
+        let isRunning = false;
+        
+        function log(message, type = 'debug') {
+            const div = document.createElement('div');
+            div.className = `debug ${type}`;
+            div.innerHTML = `${new Date().toLocaleTimeString()}: ${message}`;
+            output.appendChild(div);
+            console.log(message);
+        }
+        
+        function testSimulator() {
+            log('=== Testing M/M/1 Simulator ===');
+            
+            try {
+                simulator = new MM1Queue(2.0, 2.5);
+                log('✓ MM1Queue created successfully', 'success');
+                
+                // Test basic properties
+                log(`Arrival rate: ${simulator.arrivalRate}`);
+                log(`Service rate: ${simulator.serviceRate}`);
+                log(`Initial queue length: ${simulator.queue.length}`);
+                log(`Server busy: ${simulator.serverBusy}`);
+                
+                // Test a few steps
+                for (let i = 0; i < 5; i++) {
+                    simulator.step();
+                    log(`Step ${i + 1}: Queue=${simulator.queue.length}, Server=${simulator.serverBusy ? 'BUSY' : 'IDLE'}, Time=${simulator.currentTime.toFixed(3)}`);
+                }
+                
+                // Test statistics
+                const stats = simulator.getStatistics();
+                log(`Statistics: Queue=${stats.queueLength}, Served=${stats.customersServed}, Time=${stats.currentTime.toFixed(3)}`, 'success');
+                
+            } catch (e) {
+                log(`✗ Error: ${e.message}`, 'error');
+                console.error(e);
+            }
+        }
+        
+        function testScenarios() {
+            log('=== Testing Scenarios ===');
+            
+            if (typeof HPC_SCENARIOS !== 'undefined') {
+                log(`✓ HPC_SCENARIOS found with ${Object.keys(HPC_SCENARIOS).length} scenarios`, 'success');
+                Object.entries(HPC_SCENARIOS).forEach(([key, scenario]) => {
+                    log(`${key}: λ=${scenario.arrivalRate}, μ=${scenario.serviceRate}, ρ=${(scenario.arrivalRate/scenario.serviceRate).toFixed(3)}`);
+                });
+            } else {
+                log('✗ HPC_SCENARIOS not found', 'error');
+            }
+            
+            // Test Customer class
+            try {
+                const customer = new Customer(1, 0.0, 1.5);
+                log(`✓ Customer created: ID=${customer.id}, Arrival=${customer.arrivalTime}`, 'success');
+            } catch (e) {
+                log(`✗ Customer creation failed: ${e.message}`, 'error');
+            }
+        }
+        
+        function startSimulation() {
+            if (!simulator) {
+                simulator = new MM1Queue(2.0, 2.5);
+                log('Created new simulator for animation test');
+            }
+            
+            isRunning = true;
+            log('Starting simulation animation...', 'success');
+            animate();
+        }
+        
+        function stopSimulation() {
+            isRunning = false;
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            log('Stopped simulation animation', 'success');
+        }
+        
+        function animate() {
+            if (!isRunning || !simulator) return;
+            
+            // Run simulation steps
+            for (let i = 0; i < 3; i++) {
+                simulator.step();
+            }
+            
+            // Update display
+            updateDisplay();
+            
+            animationId = requestAnimationFrame(animate);
+        }
+        
+        function updateDisplay() {
+            if (!simulator) return;
+            
+            const stats = simulator.getStatistics();
+            
+            document.getElementById('queue-display').textContent = 
+                '█'.repeat(Math.min(stats.queueLength, 10)) + ` (${stats.queueLength})`;
+            
+            document.getElementById('server-display').textContent = 
+                stats.serverBusy ? '● BUSY' : '○ IDLE';
+            
+            document.getElementById('stats-display').textContent = 
+                `Served: ${stats.customersServed}, Util: ${(stats.avgUtilization * 100).toFixed(1)}%`;
+            
+            document.getElementById('time-display').textContent = 
+                stats.currentTime.toFixed(2);
+        }
+        
+        // Auto-run initial tests
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                testSimulator();
+                testScenarios();
+            }, 100);
+        });
+    </script>
+</body>
+</html>

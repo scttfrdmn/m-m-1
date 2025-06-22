@@ -112,10 +112,13 @@ class UIController {
     }
 
     loadDefaultScenario() {
+        console.log('Loading default scenario...');
         this.simulator = new MM1Queue(2.0, 2.5);
+        console.log('Simulator created:', this.simulator);
         this.updateParameterDisplays();
         this.updateScenarioOptions(); // Initialize scenario options
         this.updateDisplay();
+        console.log('Default scenario loaded');
     }
 
     updateArrivalRate() {
@@ -152,10 +155,12 @@ class UIController {
     }
 
     startSimulation() {
+        console.log('Starting simulation...');
         this.isRunning = true;
         this.startBtn.textContent = 'Pause';
         this.startBtn.classList.remove('btn-primary');
         this.startBtn.classList.add('btn-warning');
+        console.log('About to call animate()');
         this.animate();
     }
 
@@ -282,29 +287,59 @@ class UIController {
     }
 
     animate() {
-        if (!this.isRunning) return;
+        if (!this.isRunning) {
+            console.log('Animation stopped - isRunning is false');
+            return;
+        }
+        
+        if (!this.simulator) {
+            console.log('Animation stopped - no simulator');
+            return;
+        }
         
         // Run multiple simulation steps per frame for smoother animation
         for (let i = 0; i < 3; i++) {
-            if (this.simulator) {
+            try {
                 this.simulator.step();
+            } catch (e) {
+                console.error('Error in simulator.step():', e);
+                this.stopSimulation();
+                return;
             }
         }
         
-        this.updateDisplay();
+        try {
+            this.updateDisplay();
+        } catch (e) {
+            console.error('Error in updateDisplay():', e);
+        }
+        
         this.animationId = requestAnimationFrame(() => this.animate());
     }
 
     updateDisplay() {
-        if (!this.simulator) return;
+        if (!this.simulator) {
+            console.log('updateDisplay: no simulator');
+            return;
+        }
         
-        const stats = this.simulator.getStatistics();
+        let stats;
+        try {
+            stats = this.simulator.getStatistics();
+        } catch (e) {
+            console.error('Error getting statistics:', e);
+            return;
+        }
         
-        this.updateQueueDisplay(stats);
-        this.updateServerDisplay(stats);
-        this.updateStatsDisplay(stats);
-        this.updateEducationalDisplay(stats);
-        this.updateGraph(stats);
+        try {
+            this.updateQueueDisplay(stats);
+            this.updateServerDisplay(stats);
+            this.updateStatsDisplay(stats);
+            this.updateEducationalDisplay(stats);
+            this.updateGraph(stats);
+        } catch (e) {
+            console.error('Error in display update methods:', e);
+        }
     }
 
     updateQueueDisplay(stats) {
