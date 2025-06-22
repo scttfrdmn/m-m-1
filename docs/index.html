@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M/M/1 Queue Simulator - Interactive Web Demo</title>
+    <meta name="description" content="Interactive M/M/1 queueing system simulator with educational features, Little's Law verification, and HPC job scheduler context.">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>M/M/1 Queue Simulator</h1>
+            <p>Interactive Educational Tool for Queueing Theory & HPC Job Scheduling</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Controls Section -->
+            <section class="controls-section">
+                <h3>🎛️ Simulation Controls</h3>
+                
+                <!-- Mode Selection -->
+                <div class="control-group">
+                    <div class="form-check">
+                        <input type="checkbox" id="hpcMode">
+                        <label for="hpcMode">HPC Job Scheduler Mode</label>
+                    </div>
+                </div>
+
+                <!-- Scenario Selection -->
+                <div class="control-group">
+                    <label for="scenarioSelect">Preset Scenarios:</label>
+                    <select class="form-select" id="scenarioSelect">
+                        <option value="">Choose a scenario...</option>
+                    </select>
+                </div>
+
+                <!-- Parameter Controls -->
+                <div class="control-group">
+                    <label for="arrivalRate">Arrival Rate (λ)</label>
+                    <div class="slider-container">
+                        <input type="range" id="arrivalRate" class="slider" min="0.1" max="5.0" step="0.1" value="2.0">
+                        <span class="slider-value" id="arrivalRateValue">2.0</span>
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label for="serviceRate">Service Rate (μ)</label>
+                    <div class="slider-container">
+                        <input type="range" id="serviceRate" class="slider" min="0.1" max="5.0" step="0.1" value="2.5">
+                        <span class="slider-value" id="serviceRateValue">2.5</span>
+                    </div>
+                </div>
+
+                <!-- Simulation Buttons -->
+                <div class="control-group">
+                    <div class="button-group">
+                        <button id="startBtn" class="btn btn-primary">Start</button>
+                        <button id="stepBtn" class="btn btn-secondary">Step</button>
+                        <button id="resetBtn" class="btn btn-secondary">Reset</button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Simulation Display -->
+            <section class="simulation-section">
+                <h3>📊 Live Simulation</h3>
+                
+                <!-- Queue and Server Visualization -->
+                <div class="queue-visualization">
+                    <div class="queue-row">
+                        <span class="queue-label">Queue:</span>
+                        <div class="queue-blocks" id="queueDisplay"></div>
+                    </div>
+                    <div class="queue-row">
+                        <span class="server-label">Server:</span>
+                        <div id="serverStatus" class="server-status"></div>
+                    </div>
+                </div>
+
+                <!-- Statistics Display -->
+                <div class="stats-display" id="statsDisplay">
+                    <!-- Real-time statistics will be populated here -->
+                </div>
+
+                <!-- Queue Length Graph -->
+                <div class="graph-container">
+                    <canvas id="queueGraph"></canvas>
+                </div>
+
+                <!-- Educational Insights -->
+                <div class="educational-display" id="educationalDisplay">
+                    <!-- Educational content will be populated here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Full Width Educational Information -->
+        <section style="padding: 2rem; background: #f8f9fa; border-top: 1px solid #ddd;">
+            <h3 style="color: #007bff; margin-top: 0;">🎓 Educational Features</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <div>
+                    <h4>📐 Little's Law Verification</h4>
+                    <p>Watch live verification that <strong>L = λW</strong> - the fundamental relationship between average number in system (L), arrival rate (λ), and average time in system (W).</p>
+                </div>
+                <div>
+                    <h4>👥 Individual Customer Tracking</h4>
+                    <p>See specific customers/jobs journey through the system, showing the variation around average wait times.</p>
+                </div>
+                <div>
+                    <h4>⚠️ Utilization vs Stability</h4>
+                    <p>Discover why 100% utilization leads to instability and exponential wait time growth.</p>
+                </div>
+                <div>
+                    <h4>📈 Statistical Confidence</h4>
+                    <p>Learn when to trust simulation results through progressive confidence indicators.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p><strong>M/M/1 Queue Simulator</strong> - Educational tool for queueing theory and HPC job scheduling</p>
+            <p>
+                <a href="https://github.com/scttfrdmn/m-m-1" class="code-link">
+                    📁 View Source Code on GitHub
+                </a>
+                <a href="https://github.com/scttfrdmn/m-m-1/blob/main/main.py" class="code-link">
+                    🐍 Python Terminal Version
+                </a>
+            </p>
+            <p style="font-size: 0.9rem; margin-top: 1rem;">
+                This web simulator is a port of the Python terminal version. Both implementations demonstrate the same M/M/1 queueing principles.
+                <br>
+                <strong>For Educators:</strong> Use this web version for classroom demos and the terminal version for programming assignments.
+            </p>
+        </footer>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/mm1-simulator.js"></script>
+    <script src="js/ui-controller.js"></script>
+    <script src="js/hpc-mode.js"></script>
+</body>
+</html>
