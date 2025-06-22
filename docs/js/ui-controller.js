@@ -220,7 +220,7 @@ class UIController {
         this.startBtn.classList.remove('btn-warning');
         this.startBtn.classList.add('btn-primary');
         if (this.animationId) {
-            cancelAnimationFrame(this.animationId);
+            clearTimeout(this.animationId);
         }
     }
 
@@ -347,15 +347,13 @@ class UIController {
             return;
         }
         
-        // Run multiple simulation steps per frame for smoother animation
-        for (let i = 0; i < 3; i++) {
-            try {
-                this.simulator.step();
-            } catch (e) {
-                console.error('Error in simulator.step():', e);
-                this.stopSimulation();
-                return;
-            }
+        // Run simulation step (reduced frequency for better visibility)
+        try {
+            this.simulator.step();
+        } catch (e) {
+            console.error('Error in simulator.step():', e);
+            this.stopSimulation();
+            return;
         }
         
         try {
@@ -364,7 +362,10 @@ class UIController {
             console.error('Error in updateDisplay():', e);
         }
         
-        this.animationId = requestAnimationFrame(() => this.animate());
+        // Slow down animation for better visibility (500ms delay)
+        this.animationId = setTimeout(() => {
+            requestAnimationFrame(() => this.animate());
+        }, 500);
     }
 
     updateDisplay() {
@@ -504,7 +505,7 @@ class UIController {
     }
 
     updateGraph(stats) {
-        if (!this.graphContext || !stats.queueLengthHistory.length) return;
+        if (!this.graphContext) return;
         
         const canvas = this.graphCanvas;
         const ctx = this.graphContext;
@@ -514,11 +515,18 @@ class UIController {
         // Clear canvas
         ctx.clearRect(0, 0, width, height);
         
+        // If no data yet, show waiting message
+        if (!stats.queueLengthHistory.length || stats.queueLengthHistory.length < 2) {
+            ctx.fillStyle = '#666';
+            ctx.font = '14px monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('Queue length history will appear here...', width / 2, height / 2);
+            return;
+        }
+        
         const history = stats.queueLengthHistory;
         const maxLength = Math.max(...history, 5);
         const points = history.length;
-        
-        if (points < 2) return;
         
         // Draw grid
         ctx.strokeStyle = '#e0e0e0';
