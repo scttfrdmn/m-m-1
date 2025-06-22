@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test UI Elements</title>
+    <style>
+        body { font-family: monospace; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; background: #f0f0f0; }
+        select { width: 200px; padding: 5px; }
+    </style>
+</head>
+<body>
+    <h1>UI Elements Test</h1>
+    
+    <div class="test">
+        <h3>Test Scenario Dropdown</h3>
+        <select id="testScenarioSelect">
+            <option value="">Choose a scenario...</option>
+        </select>
+        <button onclick="populateScenarios(false)">Load Traditional</button>
+        <button onclick="populateScenarios(true)">Load HPC</button>
+        <button onclick="testLoadScenario()">Test Load</button>
+    </div>
+    
+    <div class="test">
+        <h3>Test DOM Elements</h3>
+        <div id="elementTest"></div>
+        <button onclick="testElements()">Check Elements</button>
+    </div>
+    
+    <div class="test">
+        <h3>Test MM1Queue</h3>
+        <div id="simulatorTest"></div>
+        <button onclick="testSimulator()">Test Simulator</button>
+    </div>
+
+    <script src="js/mm1-simulator.js"></script>
+    <script>
+        function populateScenarios(hpcMode) {
+            const select = document.getElementById('testScenarioSelect');
+            select.innerHTML = '<option value="">Choose a scenario...</option>';
+            
+            if (hpcMode) {
+                if (typeof HPC_SCENARIOS !== 'undefined') {
+                    Object.entries(HPC_SCENARIOS).forEach(([key, scenario]) => {
+                        const option = document.createElement('option');
+                        option.value = key;
+                        option.textContent = `${key} (ρ=${(scenario.arrivalRate/scenario.serviceRate).toFixed(2)})`;
+                        option.dataset.arrival = scenario.arrivalRate;
+                        option.dataset.service = scenario.serviceRate;
+                        select.appendChild(option);
+                    });
+                    console.log('Added HPC scenarios');
+                } else {
+                    console.error('HPC_SCENARIOS not found');
+                }
+            } else {
+                const scenarios = [
+                    { key: 'stable_low', rate1: 1.5, rate2: 3.0, desc: 'Stable Low (ρ=0.50)' },
+                    { key: 'stable_med', rate1: 2.0, rate2: 2.5, desc: 'Stable Medium (ρ=0.80)' },
+                    { key: 'stable_high', rate1: 2.8, rate2: 3.0, desc: 'Stable High (ρ=0.93)' },
+                    { key: 'critical', rate1: 2.95, rate2: 3.0, desc: 'Critical (ρ=0.98)' },
+                    { key: 'unstable', rate1: 3.1, rate2: 3.0, desc: 'Unstable (ρ=1.03)' }
+                ];
+                
+                scenarios.forEach(scenario => {
+                    const option = document.createElement('option');
+                    option.value = scenario.key;
+                    option.textContent = scenario.desc;
+                    option.dataset.arrival = scenario.rate1;
+                    option.dataset.service = scenario.rate2;
+                    select.appendChild(option);
+                });
+                console.log('Added traditional scenarios');
+            }
+        }
+        
+        function testLoadScenario() {
+            const select = document.getElementById('testScenarioSelect');
+            const selectedValue = select.value;
+            if (!selectedValue) {
+                console.log('No scenario selected');
+                return;
+            }
+            
+            const option = select.selectedOptions[0];
+            console.log('Selected:', selectedValue);
+            console.log('Option data:', option.dataset);
+            
+            if (option.dataset.arrival && option.dataset.service) {
+                console.log(`Would load: λ=${option.dataset.arrival}, μ=${option.dataset.service}`);
+            } else {
+                console.log('No data attributes found');
+            }
+        }
+        
+        function testElements() {
+            const elements = [
+                'arrivalRate', 'serviceRate', 'startBtn', 'resetBtn', 'stepBtn',
+                'hpcMode', 'scenarioSelect', 'queueDisplay', 'serverStatus',
+                'statsDisplay', 'educationalDisplay', 'queueGraph'
+            ];
+            
+            const result = document.getElementById('elementTest');
+            result.innerHTML = '';
+            
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                const status = element ? '✓' : '✗';
+                const color = element ? 'green' : 'red';
+                result.innerHTML += `<div style="color: ${color}">${status} ${id}</div>`;
+            });
+        }
+        
+        function testSimulator() {
+            const result = document.getElementById('simulatorTest');
+            try {
+                const sim = new MM1Queue(2.0, 2.5);
+                result.innerHTML = '<div style="color: green">✓ MM1Queue created successfully</div>';
+                
+                // Test a few steps
+                for (let i = 0; i < 3; i++) {
+                    sim.step();
+                }
+                
+                const stats = sim.getStatistics();
+                result.innerHTML += `<div>Stats: Queue=${stats.queueLength}, Time=${stats.currentTime.toFixed(3)}</div>`;
+                
+            } catch (e) {
+                result.innerHTML = `<div style="color: red">✗ Error: ${e.message}</div>`;
+            }
+        }
+        
+        // Auto-test on load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                populateScenarios(false);
+                testElements();
+                testSimulator();
+            }, 100);
+        });
+    </script>
+</body>
+</html>
