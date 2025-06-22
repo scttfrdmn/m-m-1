@@ -5,6 +5,7 @@
 
 class UIController {
     constructor() {
+        console.log('UIController constructor called');
         this.simulator = null;
         this.isRunning = false;
         this.animationId = null;
@@ -13,12 +14,19 @@ class UIController {
         this.rateUnit = "customers/time";
         this.terminology = this.getTerminologyMap();
         
-        this.initializeElements();
-        this.setupEventListeners();
-        this.loadDefaultScenario();
+        try {
+            this.initializeElements();
+            this.setupEventListeners();
+            this.loadDefaultScenario();
+            console.log('UIController initialization complete');
+        } catch (e) {
+            console.error('Error during UIController initialization:', e);
+        }
     }
 
     initializeElements() {
+        console.log('Initializing elements...');
+        
         // Control elements
         this.arrivalRateSlider = document.getElementById('arrivalRate');
         this.serviceRateSlider = document.getElementById('serviceRate');
@@ -37,11 +45,31 @@ class UIController {
         this.educationalDisplay = document.getElementById('educationalDisplay');
         this.graphCanvas = document.getElementById('queueGraph');
         
+        // Check for missing elements
+        const requiredElements = {
+            'arrivalRateSlider': this.arrivalRateSlider,
+            'serviceRateSlider': this.serviceRateSlider,
+            'startBtn': this.startBtn,
+            'scenarioSelect': this.scenarioSelect,
+            'queueDisplay': this.queueDisplay,
+            'statsDisplay': this.statsDisplay
+        };
+        
+        for (const [name, element] of Object.entries(requiredElements)) {
+            if (!element) {
+                console.error(`Missing element: ${name}`);
+            }
+        }
+        
         // Initialize canvas
         if (this.graphCanvas) {
             this.graphContext = this.graphCanvas.getContext('2d');
             this.setupCanvas();
+        } else {
+            console.warn('queueGraph canvas not found');
         }
+        
+        console.log('Elements initialized');
     }
 
     setupCanvas() {
@@ -56,21 +84,43 @@ class UIController {
     }
 
     setupEventListeners() {
+        console.log('Setting up event listeners...');
+        
         // Parameter sliders
-        this.arrivalRateSlider.addEventListener('input', () => this.updateArrivalRate());
-        this.serviceRateSlider.addEventListener('input', () => this.updateServiceRate());
+        if (this.arrivalRateSlider) {
+            this.arrivalRateSlider.addEventListener('input', () => this.updateArrivalRate());
+        }
+        if (this.serviceRateSlider) {
+            this.serviceRateSlider.addEventListener('input', () => this.updateServiceRate());
+        }
         
         // Control buttons
-        this.startBtn.addEventListener('click', () => this.toggleSimulation());
-        this.resetBtn.addEventListener('click', () => this.resetSimulation());
-        this.stepBtn.addEventListener('click', () => this.stepSimulation());
+        if (this.startBtn) {
+            this.startBtn.addEventListener('click', () => this.toggleSimulation());
+        }
+        if (this.resetBtn) {
+            this.resetBtn.addEventListener('click', () => this.resetSimulation());
+        }
+        if (this.stepBtn) {
+            this.stepBtn.addEventListener('click', () => this.stepSimulation());
+        }
         
         // Mode and scenario selection
-        this.hpcToggle.addEventListener('change', () => this.toggleHPCMode());
-        this.scenarioSelect.addEventListener('change', () => this.loadScenario());
+        if (this.hpcToggle) {
+            this.hpcToggle.addEventListener('change', () => this.toggleHPCMode());
+        }
+        if (this.scenarioSelect) {
+            this.scenarioSelect.addEventListener('change', () => this.loadScenario());
+        }
         
         // Window resize
-        window.addEventListener('resize', () => this.setupCanvas());
+        window.addEventListener('resize', () => {
+            if (this.graphCanvas) {
+                this.setupCanvas();
+            }
+        });
+        
+        console.log('Event listeners set up');
     }
 
     getTerminologyMap() {
